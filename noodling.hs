@@ -22,6 +22,7 @@ data FileData = FileData { contents :: Text, id :: Text, lang :: Text, path :: T
 data Switch = Switch {
                 language :: Text,
                 matchThreshold :: Int,
+                numberOfMatchesToShow :: Int,
                 filesByDirectory :: Bool,
                 comment :: Text,
                 experimental :: Bool
@@ -29,15 +30,21 @@ data Switch = Switch {
 
 userID = "12345"
 
-sendPrologue :: Switch -> Socket -> IO ()
+sendPrologue :: Switch -> Socket -> IO Text
 sendPrologue Switch{..} sock = do
   let prologue = (encodeUtf8 $ T.concat [
           "moss ", userID, "\n",
           "directory ", if filesByDirectory then "1" else "0", "\n",
           "X ", if experimental then "1" else "0", "\n",
-          "maxmatches ", T.pack $ show matchThreshold, "\n"
+          "maxmatches ", T.pack $ show matchThreshold, "\n",
+          "show ", T.pack $ show numberOfMatchesToShow, "\n",
+          "language ", language, "\n"
         ])
   sendAll sock prologue
+  -- now check whether the options are all supported
+  -- At this point, that theoretically means just the language
+  supported <- recv sock 16
+  return $ decodeUtf8 supported
 
 popFileData :: Text -> IO FileData
 popFileData path = do
