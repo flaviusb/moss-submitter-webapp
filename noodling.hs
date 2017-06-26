@@ -59,7 +59,7 @@ uploadFile sock FileData{..} = do
   let opening_stanza = T.concat ["file ", id, " ", lang, " ", size, " ", path, "\n" ]
   sendAll sock (encodeUtf8 opening_stanza)
 
-submitToMoss :: Switch -> [FileData] -> IO ()
+submitToMoss :: Switch -> [FileData] -> IO Text
 submitToMoss options files = withSocketsDo $ do
   let hints = defaultHints { addrFlags = [ AI_ALL, AI_NUMERICSERV ] }
   addr:_ <- getAddrInfo (Just hints) (Just "moss.stanford.edu") (Just "6790")
@@ -72,3 +72,8 @@ submitToMoss options files = withSocketsDo $ do
   else
     -- We continue, and upload all the files
     mapM_ (uploadFile sock) files
+  sendAll sock $ encodeUtf8 $ T.concat ["query 0 ", comment options, "\n"]
+  response <- recv sock 1024
+  sendAll sock $ encodeUtf8 "end\n"
+  close sock
+  return $ decodeUtf8 response
