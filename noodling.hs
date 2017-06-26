@@ -19,8 +19,23 @@ len = BS.length
 
 data FileData = FileData { contents :: Text, id :: Text, lang :: Text, path :: Text, size :: Text }
 
-data Switch = X
+data Switch = Switch {
+                language :: Text,
+                matchThreshold :: Int,
+                filesByDirectory :: Bool,
+                comment :: Text,
+                experimental :: Bool
+            }
 
+userID = "12345"
+
+sendPrologue :: Switch -> Socket -> IO ()
+sendPrologue switch sock = do
+  let prologue = (encodeUtf8 $ T.concat [
+          "moss ", userID, "\n",
+          "directory "
+        ])
+  sendAll sock prologue
 
 popFileData :: Text -> IO FileData
 popFileData path = do
@@ -35,7 +50,7 @@ uploadFile FileData{..} sock = do
   let opening_stanza = T.concat ["file ", id, " ", lang, " ", size, " ", path, "\n" ]
   sendAll sock (encodeUtf8 opening_stanza)
 
-submitToMoss :: [Switch] -> [FileData] -> IO ()
+submitToMoss :: Switch -> [FileData] -> IO ()
 submitToMoss options files = withSocketsDo $ do
   let hints = defaultHints { addrFlags = [ AI_ALL, AI_NUMERICSERV ] }
   addr:_ <- getAddrInfo (Just hints) (Just "moss.stanford.edu") (Just "6790")
