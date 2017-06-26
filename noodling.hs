@@ -66,3 +66,9 @@ submitToMoss options files = withSocketsDo $ do
   sock <- socket (addrFamily addr) (addrSocketType addr) (addrProtocol addr)
   bind sock (addrAddress addr)
   -- Now we do blah blah blah
+  supported <- sendPrologue options sock
+  if (T.dropWhileEnd (=='\n') supported) == "no"
+    then sendAll sock (encodeUtf8 "end\n") -- Something in the prologue wasn't supported - bail out here
+  else
+    -- We continue, and upload all the files
+    mapM_ (\x -> uploadFile x sock) files
