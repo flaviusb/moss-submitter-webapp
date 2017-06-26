@@ -30,10 +30,12 @@ data Switch = Switch {
 userID = "12345"
 
 sendPrologue :: Switch -> Socket -> IO ()
-sendPrologue switch sock = do
+sendPrologue Switch{..} sock = do
   let prologue = (encodeUtf8 $ T.concat [
           "moss ", userID, "\n",
-          "directory "
+          "directory ", if filesByDirectory then "1" else "0", "\n",
+          "X ", if experimental then "1" else "0", "\n",
+          "maxmatches ", T.pack $ show matchThreshold, "\n"
         ])
   sendAll sock prologue
 
