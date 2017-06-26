@@ -54,8 +54,8 @@ popFileData path = do
   let output = T.pack contents
   return FileData { contents=output, id="", lang="", path=path, size=(T.pack (show $ len $ encodeUtf8 output)) }
 
-uploadFile :: FileData -> Socket -> IO ()
-uploadFile FileData{..} sock = do
+uploadFile :: Socket -> FileData -> IO ()
+uploadFile sock FileData{..} = do
   let opening_stanza = T.concat ["file ", id, " ", lang, " ", size, " ", path, "\n" ]
   sendAll sock (encodeUtf8 opening_stanza)
 
@@ -71,4 +71,4 @@ submitToMoss options files = withSocketsDo $ do
     then sendAll sock (encodeUtf8 "end\n") -- Something in the prologue wasn't supported - bail out here
   else
     -- We continue, and upload all the files
-    mapM_ (\x -> uploadFile x sock) files
+    mapM_ (uploadFile sock) files
