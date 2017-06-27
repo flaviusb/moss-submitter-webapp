@@ -3,17 +3,55 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
+
 module Handler.Home where
 
 import Import
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 import Text.Julius (RawJS (..))
+import Network.Socket hiding (recv)
+import Network.Socket.ByteString (recv, sendAll)
+import Control.Exception
+import Control.Concurrent
+import Control.Exception
+import Control.Monad (forever)
+import Data.List (intersperse)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Text.Encoding (decodeUtf8, encodeUtf8)
+import qualified Data.ByteString as BS
+import System.IO
+
+len = BS.length
+
+data FileData = FileData { contents :: Text, id :: Text, lang :: Text, path :: Text, size :: Text }
+
+data Switch = Switch {
+                language :: Text,
+                matchThreshold :: Int,
+                numberOfMatchesToShow :: Int,
+                filesByDirectory :: Bool,
+                comment :: Text,
+                experimental :: Bool
+            }
 
 -- Define our data that will be used for creating the form.
+
+data MossForm = MossForm
+  {
+    fileInfo :: FileInfo,
+    switch   :: Switch
+  }
+
 data FileForm = FileForm
-    { fileInfo :: FileInfo,
-      fileDescription :: Text,
-      language :: Language
+    { ffileInfo :: FileInfo,
+      fcomment :: Text,
+      flanguage :: Language,
+      fexperimental :: Bool,
+      fdirectory :: Bool,
     }
 
 -- This is a handler function for the GET request method on the HomeR
