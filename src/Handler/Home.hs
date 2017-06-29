@@ -24,7 +24,7 @@ import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 import qualified Data.ByteString as BS
 import System.IO
 import Numeric (readDec)
-import Text.Read (read)
+import Text.Read (readMaybe)
 
 len = BS.length
 
@@ -115,13 +115,16 @@ sampleForm = renderBootstrap3 BootstrapBasicForm $ MossForm
                 ]
             }
 
-switchthing :: Text -> Text -> Text -> Text -> Text -> Text -> Either a (Maybe Switch)
+switchthing :: Text -> Text -> Text -> Text -> Text -> Text -> Either (SomeMessage (HandlerSite Handler)) (Maybe Switch)
 switchthing language tmatchThreshold tnumberOfMatchesToShow tfilesByDirectory comment texperimental
-    | experimental           <- texperimental == "checked"
-    , filesByDirectory       <- tfilesByDirectory == "checked"
-    , numberOfMatchesToShow  <- read (T.unpack tnumberOfMatchesToShow) :: Int
-    , matchThreshold         <- read (T.unpack tmatchThreshold) :: Int
+    | experimental                <- texperimental == "checked"
+    , filesByDirectory            <- tfilesByDirectory == "checked"
+    , Just numberOfMatchesToShow  <- readMaybe (T.unpack tnumberOfMatchesToShow) :: Maybe Int
+    , Just matchThreshold         <- readMaybe (T.unpack tmatchThreshold) :: Maybe Int
     = Right $ Just $ Switch {language=language, matchThreshold=matchThreshold, numberOfMatchesToShow=numberOfMatchesToShow, filesByDirectory=filesByDirectory, comment=comment, experimental=experimental}
+
+-- At some point do proper validation pass here
+switchthing _ _ _ _ _ _ = Left "Missing switches"
 
 switchesField :: Field Handler Switch
 switchesField = Field {
