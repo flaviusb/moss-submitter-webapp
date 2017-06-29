@@ -23,6 +23,8 @@ import qualified Data.Text as T
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 import qualified Data.ByteString as BS
 import System.IO
+import Numeric (readDec)
+import Text.Read (read)
 
 len = BS.length
 
@@ -112,11 +114,21 @@ sampleForm = renderBootstrap3 BootstrapBasicForm $ MossForm
                 , ("placeholder", "File description")
                 ]
             }
+
+switchthing :: Text -> Text -> Text -> Text -> Text -> Text -> Either a (Maybe Switch)
+switchthing language tmatchThreshold tnumberOfMatchesToShow tfilesByDirectory comment texperimental
+    | experimental           <- texperimental == "checked"
+    , filesByDirectory       <- tfilesByDirectory == "checked"
+    , numberOfMatchesToShow  <- read (T.unpack tnumberOfMatchesToShow) :: Int
+    , matchThreshold         <- read (T.unpack tmatchThreshold) :: Int
+    = Right $ Just $ Switch {language=language, matchThreshold=matchThreshold, numberOfMatchesToShow=numberOfMatchesToShow, filesByDirectory=filesByDirectory, comment=comment, experimental=experimental}
+
 switchesField :: Field Handler Switch
 switchesField = Field {
                   fieldParse = \rawvals _filevals ->
                     case rawvals of
-                      [language, matchThreshold, numberOfMatchesToShow, filesByDirectory, comment, experimental] -> return $ Right $ Just $ Switch {language=language, matchThreshold=matchThreshold, numberOfMatchesToShow=numberOfMatchesToShow, filesByDirectory=filesByDirectory, comment=comment, experimental=experimental}
+                      [language, matchThreshold, numberOfMatchesToShow, filesByDirectory, comment, experimental] ->
+                        return $ switchthing language matchThreshold numberOfMatchesToShow filesByDirectory comment experimental
                       _ -> return $ Left "Missing switches",
                   fieldView = \idAttr nameAttr otherAttrs eResult isReq ->
                                 [whamlet|
