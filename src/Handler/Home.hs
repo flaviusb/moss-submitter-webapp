@@ -105,13 +105,13 @@ sampleForm = renderBootstrap3 BootstrapBasicForm $ MossForm
     -- <*> areq (selectField optionsEnum) "Language" (Just C)
     -- Add attributes like the placeholder and CSS classes.
     where switchSettings = FieldSettings
-            { fsLabel = "What's on the file?"
+            { fsLabel = "Moss settings"
             , fsTooltip = Nothing
             , fsId = Nothing
             , fsName = Nothing
             , fsAttrs =
                 [ ("class", "form-control")
-                , ("placeholder", "File description")
+                , ("placeholder", "")
                 ]
             }
 
