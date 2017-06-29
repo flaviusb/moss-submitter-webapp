@@ -14,9 +14,8 @@ import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 import Text.Julius (RawJS (..))
 import Network.Socket hiding (recv)
 import Network.Socket.ByteString (recv, sendAll)
-import Control.Exception
+-- import Control.Exception
 import Control.Concurrent
-import Control.Exception
 import Control.Monad (forever)
 import Data.List (intersperse)
 import Data.Text (Text)
@@ -38,6 +37,15 @@ data Switch = Switch {
                 experimental :: Bool
             }
 
+defaultSwitches = Switch {
+                    language="c",
+                    matchThreshold=10,
+                    numberOfMatchesToShow=250,
+                    filesByDirectory=False,
+                    comment="",
+                    experimental=False
+                }
+
 -- Define our data that will be used for creating the form.
 
 data MossForm = MossForm
@@ -46,13 +54,6 @@ data MossForm = MossForm
     switch   :: Switch
   }
 
-data FileForm = FileForm
-    { ffileInfo :: FileInfo,
-      fcomment :: Text,
-      flanguage :: Language,
-      fexperimental :: Bool,
-      fdirectory :: Bool,
-    }
 
 -- This is a handler function for the GET request method on the HomeR
 -- resource pattern. All of your resource patterns are defined in
@@ -70,7 +71,7 @@ languages = [(C, "c"), (CC, "cc"), (JAVA, "java"), (ML, "ml"), (PASCAL, "pascal"
 getHomeR :: Handler Html
 getHomeR = do
     (formWidget, formEnctype) <- generateFormPost sampleForm
-    let submission = Nothing :: Maybe FileForm
+    let submission = Nothing :: Maybe MossForm
         handlerName = "getHomeR" :: Text
     defaultLayout $ do
         let (commentFormId, commentTextareaId, commentListId) = commentIds
@@ -94,13 +95,14 @@ postHomeR = do
           _      -> setTitle "Moss submission webapp"
         $(widgetFile "homepage")
 
-sampleForm :: Form FileForm
-sampleForm = renderBootstrap3 BootstrapBasicForm $ FileForm
+sampleForm :: Form MossForm
+sampleForm = renderBootstrap3 BootstrapBasicForm $ MossForm
     <$> fileAFormReq "Choose a file"
-    <*> areq textField textSettings Nothing
-    <*> areq (selectField optionsEnum) "Language" (Just C)
+    <*> areq switchesField switchSettings (Just defaultSwitches)
+    -- <*> areq textField textSettings Nothing
+    -- <*> areq (selectField optionsEnum) "Language" (Just C)
     -- Add attributes like the placeholder and CSS classes.
-    where textSettings = FieldSettings
+    where switchSettings = FieldSettings
             { fsLabel = "What's on the file?"
             , fsTooltip = Nothing
             , fsId = Nothing
@@ -110,6 +112,17 @@ sampleForm = renderBootstrap3 BootstrapBasicForm $ FileForm
                 , ("placeholder", "File description")
                 ]
             }
+switchesField :: Field Handler Switch
+switchesField = Field {
+                  fieldParse = \rawvals _filevals ->
+                    case rawvals of
+                      [language, matchThreshold, numberOfMatchesToShow, filesByDirectory, comment, experimental] -> return $ Right $ Just $ Switch {language=language, matchThreshold=matchThreshold, numberOfMatchesToShow=numberOfMatchesToShow, filesByDirectory=filesByDirectory, comment=comment, experimental=experimental}
+                      _ -> return $ Left "Missing switches",
+                  fieldView = \idAttr nameAttr otherAttrs eResult isReq ->
+                                [whamlet|
+                                |],
+                  fieldEnctype = Multipart
+              }
 
 commentIds :: (Text, Text, Text)
 commentIds = ("js-commentForm", "js-createCommentTextarea", "js-commentList")

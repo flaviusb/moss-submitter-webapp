@@ -40,8 +40,8 @@
             <div .col-lg-4.col-lg-offset-1>
                 <div .bs-callout.bs-callout-info.upload-response>
 
-                    $maybe (FileForm info con language) <- submission
-                        Your file type is <em>#{fileContentType info}</em>. You say it has: <em>#{con}</em>
+                    $maybe (MossForm info switches) <- submission
+                        Your file type is <em>#{fileContentType info}</em>. You say it has: <em>#{comment switches}</em>
 
                     $nothing
                         File upload result will be here...
