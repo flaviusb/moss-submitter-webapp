@@ -55,6 +55,7 @@ dependencies:
 - case-insensitive
 - wai
 - network
+- zip
 
 # The library contains all of our application code. The executable
 # defined below is just a thin wrapper.
