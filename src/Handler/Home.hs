@@ -93,15 +93,15 @@ postHomeR = do
         let (commentFormId, commentTextareaId, commentListId) = commentIds
         aDomId <- newIdent
         case submission of
-          Just mossForm -> 
+          Just mossForm -> do
             -- First we unzip the file into a set of files with directory and size information etc
             --  Then we create the [FileData]
             --  The next bit will have to be in some kind of async or something
             --  moss_response <- submitToMoss (switch mossForm) fileData
             --  then with the result we send an email
             setTitle "Files submitted to Moss"
-            $(widgetFile "filessubmitted") 
-          _      -> 
+            $(widgetFile "homepage") 
+          _      -> do
             setTitle "Moss submission webapp"
             $(widgetFile "homepage")
 
