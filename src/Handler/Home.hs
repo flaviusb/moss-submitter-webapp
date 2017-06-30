@@ -131,11 +131,21 @@ switchesField :: Field Handler Switch
 switchesField = Field {
                   fieldParse = \rawvals _filevals ->
                     case rawvals of
-                      [language, matchThreshold, numberOfMatchesToShow, filesByDirectory, comment, experimental] ->
-                        return $ switchthing language matchThreshold numberOfMatchesToShow filesByDirectory comment experimental
+                      [comment, language, matchThreshold, numberOfMatchesToShow, "by-directory", "experimental"] ->
+                        return $ switchthing language matchThreshold numberOfMatchesToShow "checked" comment "checked"
+                      [comment, language, matchThreshold, numberOfMatchesToShow, "by-directory"] ->
+                        return $ switchthing language matchThreshold numberOfMatchesToShow "checked" comment "unchecked"
+                      [comment, language, matchThreshold, numberOfMatchesToShow, "experimental"] ->
+                        return $ switchthing language matchThreshold numberOfMatchesToShow "unchecked" comment "checked"
+                      [comment, language, matchThreshold, numberOfMatchesToShow] ->
+                        return $ switchthing language matchThreshold numberOfMatchesToShow "unchecked" comment "unchecked"
                       _ -> return $ Left "Missing switches",
                   fieldView = \idAttr nameAttr otherAttrs eResult isReq ->
                                 [whamlet|
+                                  <br>
+                                  <label for="comment">
+                                    Comment
+                                  <input type="text" name="comment">
                                   <label for="languages">
                                     Language of source files
                                   <select name="language">
@@ -144,6 +154,19 @@ switchesField = Field {
                                     $forall opt <- mosslanguages
                                       <option value=#{snd opt}>
                                         #{snd opt}
+                                  <br>
+                                  <label for="match-threshold">
+                                    Match Threshold
+                                  <input type="number" name="match-threshold">
+                                  <label for="num-matches">
+                                    Number of matches to show
+                                  <input type="number" name="num-matches">
+                                  <label for="by-directory">
+                                    Group files by directory
+                                  <input type="checkbox" name="by-directory" value="by-directory">
+                                  <label for="experimental">
+                                    Use experimental Moss server
+                                  <input type="checkbox" name="experimental" value="experimental">
                                 |],
                   fieldEnctype = Multipart
               }
