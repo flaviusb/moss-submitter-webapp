@@ -148,6 +148,7 @@ switchesField = Field {
                                   <label for="comment">
                                     Comment
                                   <input type="text" id="comment" name=#{nameAttr}>
+                                  <br>
                                   <label for="languages">
                                     Language of source files
                                   <select id="language" name=#{nameAttr}>
@@ -160,12 +161,15 @@ switchesField = Field {
                                   <label for="match-threshold">
                                     Match Threshold
                                   <input type="number" id="match-threshold" name=#{nameAttr}>
+                                  <br>
                                   <label for="num-matches">
                                     Number of matches to show
                                   <input type="number" id="num-matches" name=#{nameAttr}>
+                                  <br>
                                   <label for="by-directory">
                                     Group files by directory
                                   <input type="checkbox" id="by-directory" value="by-directory" name=#{nameAttr}>
+                                  <br>
                                   <label for="experimental">
                                     Use experimental Moss server
                                   <input type="checkbox" id="experimental" value="experimental" name=#{nameAttr}>
