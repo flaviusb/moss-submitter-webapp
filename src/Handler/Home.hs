@@ -93,7 +93,9 @@ postHomeR = do
         let (commentFormId, commentTextareaId, commentListId) = commentIds
         aDomId <- newIdent
         case submission of
-          Just _ -> setTitle "Files submitted to Moss"
+          Just _ -> 
+            setTitle "Files submitted to Moss"
+            -- 
           _      -> setTitle "Moss submission webapp"
         $(widgetFile "homepage")
 
@@ -214,7 +216,7 @@ uploadFile sock FileData{..} = do
 submitToMoss :: Switch -> [FileData] -> IO Text
 submitToMoss options files = withSocketsDo $ do
   let hints = defaultHints { addrFlags = [ AI_ALL, AI_NUMERICSERV ] }
-  addr:_ <- getAddrInfo (Just hints) (Just "moss.stanford.edu") (Just "6790")
+  addr:_ <- getAddrInfo (Just hints) (Just "moss.stanford.edu") (Just "7690")
   sock <- socket (addrFamily addr) (addrSocketType addr) (addrProtocol addr)
   bind sock (addrAddress addr)
   -- Now we do blah blah blah
