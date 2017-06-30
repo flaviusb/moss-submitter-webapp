@@ -37,7 +37,7 @@ data Switch = Switch {
                 filesByDirectory :: Bool,
                 comment :: Text,
                 experimental :: Bool
-            }
+            } deriving (Show, Eq)
 
 defaultSwitches = Switch {
                     language="c",
@@ -139,16 +139,18 @@ switchesField = Field {
                         return $ switchthing language matchThreshold numberOfMatchesToShow "unchecked" comment "checked"
                       [comment, language, matchThreshold, numberOfMatchesToShow] ->
                         return $ switchthing language matchThreshold numberOfMatchesToShow "unchecked" comment "unchecked"
-                      _ -> return $ Left "Missing switches",
+                      [comment, language, matchThreshold, numberOfMatchesToShow, _, _] ->
+                        return $ switchthing language matchThreshold numberOfMatchesToShow "unchecked" comment "unchecked"
+                      _ -> return $ Left (fromString (show rawvals)),
                   fieldView = \idAttr nameAttr otherAttrs eResult isReq ->
                                 [whamlet|
                                   <br>
                                   <label for="comment">
                                     Comment
-                                  <input type="text" name="comment">
+                                  <input type="text" id="comment" name=#{nameAttr}>
                                   <label for="languages">
                                     Language of source files
-                                  <select name="language">
+                                  <select id="language" name=#{nameAttr}>
                                     <option value="" disabled selected style="display: none">
                                       Select a language
                                     $forall opt <- mosslanguages
@@ -157,16 +159,16 @@ switchesField = Field {
                                   <br>
                                   <label for="match-threshold">
                                     Match Threshold
-                                  <input type="number" name="match-threshold">
+                                  <input type="number" id="match-threshold" name=#{nameAttr}>
                                   <label for="num-matches">
                                     Number of matches to show
-                                  <input type="number" name="num-matches">
+                                  <input type="number" id="num-matches" name=#{nameAttr}>
                                   <label for="by-directory">
                                     Group files by directory
-                                  <input type="checkbox" name="by-directory" value="by-directory">
+                                  <input type="checkbox" id="by-directory" value="by-directory" name=#{nameAttr}>
                                   <label for="experimental">
                                     Use experimental Moss server
-                                  <input type="checkbox" name="experimental" value="experimental">
+                                  <input type="checkbox" id="experimental" value="experimental" name=#{nameAttr}>
                                 |],
                   fieldEnctype = Multipart
               }
