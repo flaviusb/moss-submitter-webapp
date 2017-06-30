@@ -67,8 +67,8 @@ data MossForm = MossForm
 
 data Language = C | CC | JAVA | ML | PASCAL | ADA | LISP | SCHEME | HASKELL | FORTRAN | ASCII | VHDL | PERL | MATLAB | PYTHON | MIPS | PROLOG | SPICE | VB | CSHARP | MODULA2 | A8086 | JAVASCRIPT | PLSQL deriving (Show, Eq, Enum, Bounded)
 
-languages :: [(Language, Text)]
-languages = [(C, "c"), (CC, "cc"), (JAVA, "java"), (ML, "ml"), (PASCAL, "pascal"), (ADA, "ada"), (LISP, "lisp"), (SCHEME, "scheme"), (HASKELL, "haskell"), (FORTRAN, "fortran"), (ASCII, "ascii"), (VHDL, "vhdl"), (PERL, "perl"), (MATLAB, "matlab"), (PYTHON, "python"), (MIPS, "mips"), (PROLOG, "prolog"), (SPICE, "spice"), (VB, "vb"), (CSHARP, "csharp"), (MODULA2, "modula2"), (A8086, "a8086"), (JAVASCRIPT, "javascript"), (PLSQL, "plsql")]
+mosslanguages :: [(Language, Text)]
+mosslanguages = [(C, "c"), (CC, "cc"), (JAVA, "java"), (ML, "ml"), (PASCAL, "pascal"), (ADA, "ada"), (LISP, "lisp"), (SCHEME, "scheme"), (HASKELL, "haskell"), (FORTRAN, "fortran"), (ASCII, "ascii"), (VHDL, "vhdl"), (PERL, "perl"), (MATLAB, "matlab"), (PYTHON, "python"), (MIPS, "mips"), (PROLOG, "prolog"), (SPICE, "spice"), (VB, "vb"), (CSHARP, "csharp"), (MODULA2, "modula2"), (A8086, "a8086"), (JAVASCRIPT, "javascript"), (PLSQL, "plsql")]
 
 getHomeR :: Handler Html
 getHomeR = do
@@ -126,6 +126,7 @@ switchthing language tmatchThreshold tnumberOfMatchesToShow tfilesByDirectory co
 -- At some point do proper validation pass here
 switchthing _ _ _ _ _ _ = Left "Missing switches"
 
+
 switchesField :: Field Handler Switch
 switchesField = Field {
                   fieldParse = \rawvals _filevals ->
@@ -135,6 +136,14 @@ switchesField = Field {
                       _ -> return $ Left "Missing switches",
                   fieldView = \idAttr nameAttr otherAttrs eResult isReq ->
                                 [whamlet|
+                                  <label for="languages">
+                                    Language of source files
+                                  <select name="language">
+                                    <option value="" disabled selected style="display: none">
+                                      Select a language
+                                    $forall opt <- mosslanguages
+                                      <option value=#{snd opt}>
+                                        #{snd opt}
                                 |],
                   fieldEnctype = Multipart
               }
