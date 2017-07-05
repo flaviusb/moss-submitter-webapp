@@ -25,6 +25,7 @@ import qualified Data.ByteString as BS
 import System.IO
 import Numeric (readDec)
 import Text.Read (readMaybe)
+import System.Environment (getEnv)
 
 len = BS.length
 
@@ -188,12 +189,13 @@ switchesField = Field {
 commentIds :: (Text, Text, Text)
 commentIds = ("js-commentForm", "js-createCommentTextarea", "js-commentList")
 
-userID = "12345"
+-- userID = "12345"
 
 sendPrologue :: Switch -> Socket -> IO Text
 sendPrologue Switch{..} sock = do
+  userID <- getEnv "MOSSUserID"
   let prologue = (encodeUtf8 $ T.concat [
-          "moss ", userID, "\n",
+          "moss ", T.pack userID, "\n",
           "directory ", if filesByDirectory then "1" else "0", "\n",
           "X ", if experimental then "1" else "0", "\n",
           "maxmatches ", T.pack $ show matchThreshold, "\n",
