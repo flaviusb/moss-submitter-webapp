@@ -110,9 +110,6 @@ sampleForm :: Form MossForm
 sampleForm = renderBootstrap3 BootstrapBasicForm $ MossForm
     <$> fileAFormReq "Choose a file"
     <*> areq switchesField switchSettings (Just defaultSwitches)
-    -- <*> areq textField textSettings Nothing
-    -- <*> areq (selectField optionsEnum) "Language" (Just C)
-    -- Add attributes like the placeholder and CSS classes.
     where switchSettings = FieldSettings
             { fsLabel = "Moss settings"
             , fsTooltip = Nothing
