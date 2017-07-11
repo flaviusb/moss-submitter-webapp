@@ -26,6 +26,12 @@ import System.IO
 import Numeric (readDec)
 import Text.Read (readMaybe)
 import System.Environment (getEnv)
+import System.IO.Temp (withSystemTempFile)
+import qualified Data.Map as M
+import Codec.Archive.Zip
+import Path (parseAbsFile)
+import Path.Internal
+import Control.Monad.Trans.Class
 
 len = BS.length
 
@@ -95,11 +101,19 @@ postHomeR = do
         aDomId <- newIdent
         case submission of
           Just mossForm -> do
-            -- First we unzip the file into a set of files with directory and size information etc
+            -- First we create a temp file and dump the bytes we got there, as the zip library needs a real file backing it
+            -- Then we unzip the file into a set of files with directory and size information etc
             --  Then we create the [FileData]
             --  The next bit will have to be in some kind of async or something
             --  moss_response <- submitToMoss (switch mossForm) fileData
             --  then with the result we send an email
+            files <- lift $ withSystemTempFile "moss.zip" $ \tmpFile handle -> do
+              hSetBinaryMode handle True
+              -- data_out <- liftIO $ fileSource $ fileInfo mossForm
+              -- BS.hPut handle data_out
+              all_descriptors <- withArchive (Path tmpFile) (M.keys <$> getEntries)
+              -- fmap all_descriptors ()
+              return all_descriptors
             setTitle "Files submitted to Moss"
             $(widgetFile "homepage") 
           _      -> do
