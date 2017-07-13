@@ -103,8 +103,9 @@ postHomeR = do
         case submission of
           Just mossForm -> do
             -- First we create a temp file and dump the bytes we got there, as the zip library needs a real file backing it
-            -- Then we unzip the file into a set of files with directory and size information etc
-            --  Then we create the [FileData]
+            -- Then we get the list of descriptors, fmapping a descriptor -> FileData over that to get a FileData
+            -- The descriptor -> FileData will have to pull out the bytes, get the length, get a 'canonical path', and generate a unique id.
+            -- At this point we assume the same language for every file; we may revisit this.
             --  The next bit will have to be in some kind of async or something
             --  moss_response <- submitToMoss (switch mossForm) fileData
             --  then with the result we send an email
@@ -112,7 +113,6 @@ postHomeR = do
               hSetBinaryMode handle True
               liftIO $ do
                 runConduitRes $ (fileSource $ fileInfo mossForm) .| (sinkFileBS tmpFile)
-              -- BS.hPut handle data_out
               all_descriptors <- withArchive (Path tmpFile) (M.keys <$> getEntries)
               -- fmap all_descriptors ()
               return all_descriptors
