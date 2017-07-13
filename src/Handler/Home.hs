@@ -110,7 +110,10 @@ postHomeR = do
             --  moss_response <- submitToMoss (switch mossForm) fileData
             --  then with the result we send an email
             fileData <- lift $ withSystemTempFile "moss.zip" $ \tmpFile handle -> do
-              hSetBinaryMode handle True
+              -- hSetBinaryMode handle True
+              -- The very first thing we do is close the handle we are given. This is because we need to
+              -- create and destroy handles to this file, and we can't just pass in the handle we already have.
+              hClose handle
               liftIO $ do
                 runConduitRes $ (fileSource $ fileInfo mossForm) .| (sinkFileBS tmpFile)
               all_descriptors <- withArchive (Path tmpFile) (M.keys <$> getEntries)
