@@ -114,8 +114,8 @@ postHomeR = do
               liftIO $ do
                 runConduitRes $ (fileSource $ fileInfo mossForm) .| (sinkFileBS tmpFile)
               all_descriptors <- withArchive (Path tmpFile) (M.keys <$> getEntries)
-              -- fmap all_descriptors ()
-              return all_descriptors
+              files <- mapM (make_file tmpFile) all_descriptors
+              return files
             setTitle "Files submitted to Moss"
             $(widgetFile "homepage") 
           _      -> do
