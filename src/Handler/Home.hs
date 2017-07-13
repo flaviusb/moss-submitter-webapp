@@ -114,7 +114,7 @@ postHomeR = do
               liftIO $ do
                 runConduitRes $ (fileSource $ fileInfo mossForm) .| (sinkFileBS tmpFile)
               all_descriptors <- withArchive (Path tmpFile) (M.keys <$> getEntries)
-              files <- mapM (make_file tmpFile) all_descriptors
+              files <- mapM (make_file tmpFile $ language $ switch mossForm) all_descriptors
               return files
             setTitle "Files submitted to Moss"
             $(widgetFile "homepage") 
@@ -122,13 +122,13 @@ postHomeR = do
             setTitle "Moss submission webapp"
             $(widgetFile "homepage")
 
-make_file :: FilePath -> EntrySelector -> IO FileData
-make_file file selector = do
+make_file :: FilePath -> Text -> EntrySelector -> IO FileData
+make_file file lang selector = do
   let path = getEntryName selector
   bytes <- withArchive (Path file) (getEntry selector)
   let contents = decodeUtf8 bytes
   let size = T.pack ((show $ T.length contents) :: String)
-  return FileData {contents = contents, size = size, path = path, lang = "C", id=""}
+  return FileData {contents = contents, size = size, path = path, lang = lang, id=""}
 
 sampleForm :: Form MossForm
 sampleForm = renderBootstrap3 BootstrapBasicForm $ MossForm
