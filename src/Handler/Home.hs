@@ -122,6 +122,14 @@ postHomeR = do
             setTitle "Moss submission webapp"
             $(widgetFile "homepage")
 
+make_file :: FilePath -> EntrySelector -> IO FileData
+make_file file selector = do
+  let path = getEntryName selector
+  bytes <- withArchive (Path file) (getEntry selector)
+  let contents = decodeUtf8 bytes
+  let size = T.pack ((show $ T.length contents) :: String)
+  return FileData {contents = contents, size = size, path = path, lang = "C", id=""}
+
 sampleForm :: Form MossForm
 sampleForm = renderBootstrap3 BootstrapBasicForm $ MossForm
     <$> fileAFormReq "Choose a file"
