@@ -109,13 +109,14 @@ postHomeR = do
             --  The next bit will have to be in some kind of async or something
             --  moss_response <- submitToMoss (switch mossForm) fileData
             --  then with the result we send an email
-            files <- lift $ withSystemTempFile "moss.zip" $ \tmpFile handle -> do
+            fileData <- lift $ withSystemTempFile "moss.zip" $ \tmpFile handle -> do
               hSetBinaryMode handle True
               liftIO $ do
                 runConduitRes $ (fileSource $ fileInfo mossForm) .| (sinkFileBS tmpFile)
               all_descriptors <- withArchive (Path tmpFile) (M.keys <$> getEntries)
               files <- mapM (make_file tmpFile $ language $ switch mossForm) all_descriptors
               return files
+            lift $ submitToMoss (switch mossForm) fileData
             setTitle "Files submitted to Moss"
             $(widgetFile "homepage") 
           _      -> do
@@ -250,13 +251,14 @@ submitToMoss options files = withSocketsDo $ do
   bind sock (addrAddress addr)
   -- Now we do blah blah blah
   supported <- sendPrologue options sock
-  if (T.dropWhileEnd (=='\n') supported) == "no"
-    then sendAll sock (encodeUtf8 "end\n") -- Something in the prologue wasn't supported - bail out here
-  else
+  if (T.dropWhileEnd (=='\n') supported) == "no" then do
+    sendAll sock (encodeUtf8 "end\n") -- Something in the prologue wasn't supported - bail out here
+    return "Something in the prologue was not supported"
+  else do
     -- We continue, and upload all the files
     mapM_ (uploadFile sock) files
-  sendAll sock $ encodeUtf8 $ T.concat ["query 0 ", comment options, "\n"]
-  response <- recv sock 1024
-  sendAll sock $ encodeUtf8 "end\n"
-  close sock
-  return $ decodeUtf8 response
+    sendAll sock $ encodeUtf8 $ T.concat ["query 0 ", comment options, "\n"]
+    response <- recv sock 1024
+    sendAll sock $ encodeUtf8 "end\n"
+    close sock
+    return $ decodeUtf8 response
