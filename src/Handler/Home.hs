@@ -242,6 +242,8 @@ uploadFile :: Socket -> FileData -> IO ()
 uploadFile sock FileData{..} = do
   let opening_stanza = T.concat ["file ", id, " ", lang, " ", size, " ", path, "\n" ]
   sendAll sock (encodeUtf8 opening_stanza)
+  sendAll sock (encodeUtf8 contents)
+  sendAll sock "done.\n"
 
 submitToMoss :: Switch -> [FileData] -> IO Text
 submitToMoss options files = withSocketsDo $ do
