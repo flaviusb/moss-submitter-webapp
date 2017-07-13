@@ -32,6 +32,7 @@ import Codec.Archive.Zip
 import Path (parseAbsFile)
 import Path.Internal
 import Control.Monad.Trans.Class
+import Conduit
 
 len = BS.length
 
@@ -109,7 +110,8 @@ postHomeR = do
             --  then with the result we send an email
             files <- lift $ withSystemTempFile "moss.zip" $ \tmpFile handle -> do
               hSetBinaryMode handle True
-              -- data_out <- liftIO $ fileSource $ fileInfo mossForm
+              liftIO $ do
+                runConduitRes $ (fileSource $ fileInfo mossForm) .| (sinkFileBS tmpFile)
               -- BS.hPut handle data_out
               all_descriptors <- withArchive (Path tmpFile) (M.keys <$> getEntries)
               -- fmap all_descriptors ()
