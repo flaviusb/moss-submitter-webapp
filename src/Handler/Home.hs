@@ -6,6 +6,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Handler.Home where
 
@@ -87,6 +88,7 @@ getHomeR = do
         let (commentFormId, commentTextareaId, commentListId) = commentIds
         aDomId <- newIdent
         setTitle "Moss submission webapp"
+        let linkToResults :: Maybe Text = Nothing
         $(widgetFile "homepage")
 
 postHomeR :: Handler Html
@@ -125,7 +127,7 @@ postHomeR = do
             setTitle "Files submitted to Moss"
             $(widgetFile "homepage") 
           _      -> do
-            let linkToResults = Nothing
+            let linkToResults :: Maybe Text = Nothing
             setTitle "Moss submission webapp"
             $(widgetFile "homepage")
 
