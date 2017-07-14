@@ -120,10 +120,12 @@ postHomeR = do
               let decorated_descriptors = zip (fmap (T.pack . show) (take (length all_descriptors) [1..])) all_descriptors
               files <- mapM (make_file tmpFile $ language $ switch mossForm) decorated_descriptors
               return files
-            lift $ submitToMoss (switch mossForm) fileData
+            linkToResultsTemp <- lift $ submitToMoss (switch mossForm) fileData
+            let linkToResults = Just linkToResultsTemp
             setTitle "Files submitted to Moss"
             $(widgetFile "homepage") 
           _      -> do
+            let linkToResults = Nothing
             setTitle "Moss submission webapp"
             $(widgetFile "homepage")
 
