@@ -255,9 +255,9 @@ uploadFile sock FileData{..} = do
 
 submitToMoss :: Switch -> [FileData] -> IO Text
 submitToMoss options files = withSocketsDo $ do
-  let hints = defaultHints { addrFlags = [ AI_ALL, AI_NUMERICSERV ] }
+  let hints = defaultHints { addrFlags = [ AI_NUMERICSERV ] }
   addr:_ <- getAddrInfo (Just hints) (Just "moss.stanford.edu") (Just "7690")
-  sock <- socket (addrFamily addr) (addrSocketType addr) (addrProtocol addr)
+  sock <- socket (addrFamily addr) Stream (addrProtocol addr)
   bind sock (addrAddress addr)
   -- Now we do blah blah blah
   supported <- sendPrologue options sock
