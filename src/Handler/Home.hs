@@ -10,7 +10,7 @@
 
 module Handler.Home where
 
-import Import hiding (decodeUtf8, encodeUtf8, hGetContents)
+import Import hiding (decodeUtf8, encodeUtf8, hGetContents, connect)
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 import Text.Julius (RawJS (..))
 import Network.Socket hiding (recv)
@@ -33,7 +33,7 @@ import Codec.Archive.Zip
 import Path (parseAbsFile)
 import Path.Internal
 import Control.Monad.Trans.Class
-import Conduit
+import Conduit hiding (connect)
 
 len = BS.length
 
@@ -258,7 +258,7 @@ submitToMoss options files = withSocketsDo $ do
   let hints = defaultHints { addrFlags = [ AI_NUMERICSERV ] }
   addr:_ <- getAddrInfo (Just hints) (Just "moss.stanford.edu") (Just "7690")
   sock <- socket (addrFamily addr) Stream (addrProtocol addr)
-  bind sock (addrAddress addr)
+  connect sock (addrAddress addr)
   -- Now we do blah blah blah
   supported <- sendPrologue options sock
   if (T.dropWhileEnd (=='\n') supported) == "no" then do
