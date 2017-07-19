@@ -238,14 +238,6 @@ sendPrologue Switch{..} sock = do
   supported <- recv sock 16
   return $ decodeUtf8 supported
 
-popFileData :: Text -> IO FileData
-popFileData path = do
-  handle <- openFile (T.unpack path) ReadMode  
-  contents <- hGetContents handle  
-  hClose handle
-  let output = T.pack contents
-  return FileData { contents=output, id="", lang="", path=path, size=(T.pack (show $ len $ encodeUtf8 output)) }
-
 uploadFile :: Socket -> FileData -> IO ()
 uploadFile sock FileData{..} = do
   let opening_stanza = T.concat ["file ", id, " ", lang, " ", size, " ", path, "\n" ]
