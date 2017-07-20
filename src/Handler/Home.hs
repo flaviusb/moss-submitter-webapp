@@ -241,9 +241,15 @@ sendPrologue Switch{..} sock = do
 uploadFile :: Socket -> FileData -> IO ()
 uploadFile sock FileData{..} = do
   let opening_stanza = T.concat ["file ", id, " ", lang, " ", size, " ", path, "\n" ]
-  sendAll sock (encodeUtf8 opening_stanza)
-  sendAll sock (encodeUtf8 contents)
-  sendAll sock "done.\n"
+  let total_message = T.concat [opening_stanza, contents, "done.\n"]
+  -- We can't actually do logging here until we thread the handler monad through instead of lifting it to IO back in the
+  -- call to submitToMoss
+  -- $(logInfo) total_message
+  sendAll sock $ encodeUtf8 total_message
+
+--  sendAll sock (encodeUtf8 opening_stanza)
+--  sendAll sock (encodeUtf8 contents)
+--  sendAll sock "done.\n"
 
 submitToMoss :: Switch -> [FileData] -> IO Text
 submitToMoss options files = withSocketsDo $ do
