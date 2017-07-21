@@ -39,12 +39,12 @@
 
             <div .col-lg-4.col-lg-offset-1>
                 <div .bs-callout.bs-callout-info.upload-response>
-
-                    $maybe results <- linkToResults
-                        The Moss server returned this result: #{results}
-
-                    $nothing
-                        File upload result will be here...
+                    $case linkToResults
+                        $of Just (PackResults prologue_reply query_reply)
+                            The Moss server accepted the options with this result: #{prologue_reply}
+                            The Moss server analysed the files with this result: #{query_reply}
+                        $of Nothing
+                            File upload result will be here...
 
 
     <hr>

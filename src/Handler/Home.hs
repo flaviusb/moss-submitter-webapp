@@ -7,6 +7,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
 
 module Handler.Home where
 
@@ -88,7 +89,7 @@ getHomeR = do
         let (commentFormId, commentTextareaId, commentListId) = commentIds
         aDomId <- newIdent
         setTitle "Moss submission webapp"
-        let linkToResults :: Maybe Text = Nothing
+        let linkToResults :: Maybe PackResults = Nothing
         $(widgetFile "homepage")
 
 postHomeR :: Handler Html
@@ -123,13 +124,15 @@ postHomeR = do
               files <- mapM (make_file tmpFile $ language $ switch mossForm) decorated_descriptors
               return files
             linkToResultsTemp <- lift $ submitToMoss (switch mossForm) fileData
-            let linkToResults = Just linkToResultsTemp
+            let linkToResults :: Maybe PackResults = Just linkToResultsTemp
             setTitle "Files submitted to Moss"
             $(widgetFile "homepage") 
           _      -> do
-            let linkToResults :: Maybe Text = Nothing
+            let linkToResults :: Maybe PackResults = Nothing
             setTitle "Moss submission webapp"
             $(widgetFile "homepage")
+
+data PackResults = PackResults Text Text deriving (Typeable, Show)
 
 make_file :: FilePath -> Text -> (Text, EntrySelector) -> IO FileData
 make_file file lang (id, selector) = do
@@ -235,7 +238,7 @@ sendPrologue Switch{..} sock = do
   sendAll sock prologue
   -- now check whether the options are all supported
   -- At this point, that theoretically means just the language
-  supported <- recv sock 16
+  supported <- recv sock 1024
   return $ decodeUtf8 supported
 
 uploadFile :: Socket -> FileData -> IO ()
@@ -251,7 +254,7 @@ uploadFile sock FileData{..} = do
 --  sendAll sock (encodeUtf8 contents)
 --  sendAll sock "done.\n"
 
-submitToMoss :: Switch -> [FileData] -> IO Text
+submitToMoss :: Switch -> [FileData] -> IO PackResults
 submitToMoss options files = withSocketsDo $ do
   let hints = defaultHints { addrFlags = [ AI_NUMERICSERV ] }
   addr:_ <- getAddrInfo (Just hints) (Just "moss.stanford.edu") (Just "7690")
@@ -261,12 +264,12 @@ submitToMoss options files = withSocketsDo $ do
   supported <- sendPrologue options sock
   if (T.dropWhileEnd (=='\n') supported) == "no" then do
     sendAll sock (encodeUtf8 "end\n") -- Something in the prologue wasn't supported - bail out here
-    return "Something in the prologue was not supported"
+    return $ PackResults supported "Something in the prologue was not supported"
   else do
     -- We continue, and upload all the files
     mapM_ (uploadFile sock) files
     sendAll sock $ encodeUtf8 $ T.concat ["query 0 ", comment options, "\n"]
-    response <- recv sock 1024
+    response <- recv sock 4096
     sendAll sock $ encodeUtf8 "end\n"
     close sock
-    return $ decodeUtf8 response
+    return $ PackResults supported $ decodeUtf8 response
