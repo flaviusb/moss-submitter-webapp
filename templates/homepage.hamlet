@@ -41,8 +41,11 @@
                 <div .bs-callout.bs-callout-info.upload-response>
                     $case linkToResults
                         $of Just (PackResults prologue_reply query_reply)
-                            The Moss server accepted the options with this result: #{prologue_reply}
-                            The Moss server analysed the files with this result: #{query_reply}
+                            The Moss server analysed the files. 
+                            $if (isPrefixOf "http" query_reply)
+                              The results are available here: #{makea query_reply}
+                            $else
+                              The server responded with this message: #{query_reply}
                         $of Nothing
                             File upload result will be here...
 

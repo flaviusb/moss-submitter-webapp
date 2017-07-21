@@ -36,6 +36,8 @@ import Path.Internal
 import Control.Monad.Trans.Class
 import Conduit hiding (connect)
 
+makea href = preEscapedToMarkup $ mconcat ["<a href=\"", href, "\">", href, "</a>"]
+
 len = BS.length
 
 data FileData = FileData { contents :: Text, id :: Text, lang :: Text, path :: Text, size :: Text }
