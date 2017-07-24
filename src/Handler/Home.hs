@@ -11,7 +11,7 @@
 
 module Handler.Home where
 
-import Import hiding (decodeUtf8, encodeUtf8, hGetContents, connect)
+import Import hiding (decodeUtf8, decodeUtf8', encodeUtf8, hGetContents, connect)
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 import Text.Julius (RawJS (..))
 import Network.Socket hiding (recv)
@@ -22,7 +22,7 @@ import Control.Monad (forever)
 import Data.List (intersperse)
 import Data.Text (Text)
 import qualified Data.Text as T
-import Data.Text.Encoding (decodeUtf8, encodeUtf8)
+import Data.Text.Encoding (decodeUtf8, decodeUtf8', encodeUtf8)
 import qualified Data.ByteString as BS
 import System.IO
 import Numeric (readDec)
@@ -123,7 +123,8 @@ postHomeR = do
                 runConduitRes $ (fileSource $ fileInfo mossForm) .| (sinkFileBS tmpFile)
               all_descriptors <- withArchive (Path tmpFile) (M.keys <$> getEntries)
               let decorated_descriptors = zip (fmap (T.pack . show) (take (length all_descriptors) [1..])) all_descriptors
-              files <- mapM (make_file tmpFile $ language $ switch mossForm) decorated_descriptors
+              maybe_files <- mapM (make_file tmpFile $ language $ switch mossForm) decorated_descriptors
+              let files = catMaybes maybe_files
               return files
             linkToResultsTemp <- lift $ submitToMoss (switch mossForm) fileData
             let linkToResults :: Maybe PackResults = Just linkToResultsTemp
@@ -136,13 +137,15 @@ postHomeR = do
 
 data PackResults = PackResults Text Text deriving (Typeable, Show)
 
-make_file :: FilePath -> Text -> (Text, EntrySelector) -> IO FileData
+make_file :: FilePath -> Text -> (Text, EntrySelector) -> IO (Maybe FileData)
 make_file file lang (id, selector) = do
   let path = getEntryName selector
   bytes <- withArchive (Path file) (getEntry selector)
-  let contents = decodeUtf8 bytes
-  let size = T.pack ((show $ T.length contents) :: String)
-  return FileData {contents=contents, size=size, path=path, lang=lang, id=id}
+  case decodeUtf8' bytes of
+    Left _ -> return Nothing
+    Right contents -> do
+        let size = T.pack ((show $ T.length contents) :: String)
+        return $ Just $ FileData {contents=contents, size=size, path=path, lang=lang, id=id}
 
 sampleForm :: Form MossForm
 sampleForm = renderBootstrap3 BootstrapBasicForm $ MossForm
