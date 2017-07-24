@@ -252,7 +252,7 @@ uploadFile sock FileData{..} = do
   let total_message = T.concat [opening_stanza, contents]
   -- We can't actually do logging here until we thread the handler monad through instead of lifting it to IO back in the
   -- call to submitToMoss
-  -- $(logInfo) total_message
+  -- Not sure why this comment causes build failures on travis if left on it's own line: -- $(logInfo) total_message
   sendAll sock $ encodeUtf8 total_message
 
 --  sendAll sock (encodeUtf8 opening_stanza)
