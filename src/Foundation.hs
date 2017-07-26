@@ -68,7 +68,9 @@ instance Yesod App where
         case appRoot $ appSettings app of
             Nothing -> getApprootText guessApproot app req
             Just root -> root
-
+    -- Make maximumContentLength larger for the form submission route, so we can get uploads
+    maximumContentLength _ (Just HomeR) = Just (512 * 1024 * 1024)
+    maximumContentLength _ _ = Just (2 * 1024 * 1024)
     -- Store session data on the client in encrypted cookies,
     -- default session idle timeout is 120 minutes
     makeSessionBackend _ = Just <$> defaultClientSessionBackend
