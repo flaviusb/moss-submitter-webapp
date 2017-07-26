@@ -193,12 +193,12 @@ switchesField = Field {
                                 [whamlet|
                                   <br>
                                   <label for="comment">
-                                    Any comment or label you want to include in the results.
+                                    You may enter a short comment that describes the submissions (for example, the name of the course and the assignment). This comment will appear at the top of the results set - it may be useful if you return to view the results at a later time.
                                   <br>
                                   <input type="text" id="comment" name=#{nameAttr}>
                                   <br>
                                   <label for="languages">
-                                    Language of source files.
+                                    Language of source files - at this time, we assume that all files submitted are in the same programming language.
                                   <br>
                                   <select id="language" name=#{nameAttr}>
                                     <option value="" disabled selected style="display: none">
