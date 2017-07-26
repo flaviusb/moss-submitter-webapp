@@ -34,6 +34,7 @@ import Codec.Archive.Zip
 import Path (parseAbsFile)
 import Path.Internal
 import Control.Monad.Trans.Class
+import Data.Either (isRight)
 import Conduit hiding (connect)
 
 makea href = preEscapedToMarkup $ mconcat ["<a href=\"", href, "\">", href, "</a>"]
@@ -190,17 +191,22 @@ switchesField = Field {
                         return $ switchthing language matchThreshold numberOfMatchesToShow "unchecked" comment "unchecked"
                       _ -> return $ Left (fromString (show rawvals)),
                   fieldView = \idAttr nameAttr otherAttrs eResult isReq ->
+                                let hasDefaults = isRight eResult
+                                    noLeft      = (\_ -> "")
+                                    experimentalChecked = either (\_ -> False) experimental eResult
+                                    filesByDirectoryChecked = either (\_ -> False) filesByDirectory eResult
+                                    in
                                 [whamlet|
                                   <br>
                                   <label for="comment">
                                     You may enter a short comment that describes the submissions (for example, the name of the course and the assignment). This comment will appear at the top of the results set - it may be useful if you return to view the results at a later time.
                                   <br>
-                                  <input type="text" id="comment" name=#{nameAttr}>
+                                  <input type="text" id="comment" name=#{nameAttr} :hasDefaults:value=#{either noLeft comment eResult} >
                                   <br>
                                   <label for="languages">
                                     Language of source files - at this time, we assume that all files submitted are in the same programming language.
                                   <br>
-                                  <select id="language" name=#{nameAttr}>
+                                  <select id="language" name=#{nameAttr} :hasDefaults:value=#{either noLeft language eResult} >
                                     <option value="" disabled selected style="display: none">
                                       Select a language
                                     $forall opt <- mosslanguages
@@ -210,22 +216,22 @@ switchesField = Field {
                                   <label for="match-threshold">
                                     Match threshold. This sets the number of times a fingerprint can be found in different student's work before it is ignored. This is useful to set if you have a template file that most of your students will be using, but Moss cannot detect cheating rings larger than this number. It should be set to be larger than the largest size cheating ring you believe you will encounter.
                                   <br>
-                                  <input type="number" id="match-threshold" name=#{nameAttr}>
+                                  <input type="number" id="match-threshold" name=#{nameAttr} :hasDefaults:value=#{either noLeft (show . matchThreshold) eResult} >
                                   <br>
                                   <label for="num-matches">
                                     Maximum number of matches to show.
                                   <br>
-                                  <input type="number" id="num-matches" name=#{nameAttr}>
+                                  <input type="number" id="num-matches" name=#{nameAttr} :hasDefaults:value=#{either noLeft (show . numberOfMatchesToShow) eResult} >
                                   <br>
                                   <label for="by-directory">
                                     Treat each directory as a single student's work. If this option is not selected, Moss treats every file individually as a single student's work.
                                   <br>
-                                  <input type="checkbox" id="by-directory" value="by-directory" name=#{nameAttr}>
+                                  <input type="checkbox" id="by-directory" value="by-directory" name=#{nameAttr} :filesByDirectoryChecked:checked >
                                   <br>
                                   <label for="experimental">
                                     Use experimental Moss server, rather than the usual stable Moss server.
                                   <br>
-                                  <input type="checkbox" id="experimental" value="experimental" name=#{nameAttr}>
+                                  <input type="checkbox" id="experimental" value="experimental" name=#{nameAttr} :experimentalChecked:checked >
                                 |],
                   fieldEnctype = Multipart
               }
