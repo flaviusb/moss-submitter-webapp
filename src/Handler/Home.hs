@@ -194,10 +194,12 @@ switchesField = Field {
                                   <br>
                                   <label for="comment">
                                     Any comment or label you want to include in the results.
+                                  <br>
                                   <input type="text" id="comment" name=#{nameAttr}>
                                   <br>
                                   <label for="languages">
                                     Language of source files.
+                                  <br>
                                   <select id="language" name=#{nameAttr}>
                                     <option value="" disabled selected style="display: none">
                                       Select a language
@@ -207,18 +209,22 @@ switchesField = Field {
                                   <br>
                                   <label for="match-threshold">
                                     Match threshold. This sets the number of times a fingerprint can be found in different student's work before it is ignored. This is useful to set if you have a template file that most of your students will be using, but Moss cannot detect cheating rings larger than this number. It should be set to be larger than the largest size cheating ring you believe you will encounter.
+                                  <br>
                                   <input type="number" id="match-threshold" name=#{nameAttr}>
                                   <br>
                                   <label for="num-matches">
                                     Maximum number of matches to show.
+                                  <br>
                                   <input type="number" id="num-matches" name=#{nameAttr}>
                                   <br>
                                   <label for="by-directory">
                                     Treat each directory as a single student's work. If this option is not selected, Moss treats every file individually as a single student's work.
+                                  <br>
                                   <input type="checkbox" id="by-directory" value="by-directory" name=#{nameAttr}>
                                   <br>
                                   <label for="experimental">
                                     Use experimental Moss server, rather than the usual stable Moss server.
+                                  <br>
                                   <input type="checkbox" id="experimental" value="experimental" name=#{nameAttr}>
                                 |],
                   fieldEnctype = Multipart
