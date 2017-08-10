@@ -81,7 +81,7 @@ data MossForm = MossForm
 data Language = C | CC | JAVA | ML | PASCAL | ADA | LISP | SCHEME | HASKELL | FORTRAN | ASCII | VHDL | PERL | MATLAB | PYTHON | MIPS | PROLOG | SPICE | VB | CSHARP | MODULA2 | A8086 | JAVASCRIPT | PLSQL deriving (Show, Eq, Enum, Bounded)
 
 mosslanguages :: [(Language, Text)]
-mosslanguages = [(C, "c"), (CC, "cc"), (JAVA, "java"), (PYTHON, "python"), (MATLAB, "matlab"), (ML, "ml"), (PASCAL, "pascal"), (ADA, "ada"), (LISP, "lisp"), (SCHEME, "scheme"), (HASKELL, "haskell"), (FORTRAN, "fortran"), (ASCII, "ascii"), (VHDL, "vhdl"), (PERL, "perl"), (MIPS, "mips"), (PROLOG, "prolog"), (SPICE, "spice"), (VB, "vb"), (CSHARP, "csharp"), (MODULA2, "modula2"), (A8086, "a8086"), (JAVASCRIPT, "javascript"), (PLSQL, "plsql")]
+mosslanguages = [(C, "c"), (CC, "C++"), (JAVA, "java"), (PYTHON, "python"), (MATLAB, "matlab"), (ML, "ml"), (PASCAL, "pascal"), (ADA, "ada"), (LISP, "lisp"), (SCHEME, "scheme"), (HASKELL, "haskell"), (FORTRAN, "fortran"), (ASCII, "ascii"), (VHDL, "vhdl"), (PERL, "perl"), (MIPS, "mips"), (PROLOG, "prolog"), (SPICE, "spice"), (VB, "vb"), (CSHARP, "C#"), (MODULA2, "modula2"), (A8086, "a8086"), (JAVASCRIPT, "javascript"), (PLSQL, "plsql")]
 
 getHomeR :: Handler Html
 getHomeR = do
@@ -163,13 +163,18 @@ sampleForm = renderBootstrap3 BootstrapBasicForm $ MossForm
                 ]
             }
 
+languageSubstitution :: Text -> Text
+languageSubstitution "C++" = "cc"
+languageSubstitution "C#" = "csharp"
+languageSubstitution x = x
+
 switchthing :: Text -> Text -> Text -> Text -> Text -> Text -> Either (SomeMessage (HandlerSite Handler)) (Maybe Switch)
 switchthing language tmatchThreshold tnumberOfMatchesToShow tfilesByDirectory comment texperimental
     | experimental                <- texperimental == "checked"
     , filesByDirectory            <- tfilesByDirectory == "checked"
     , Just numberOfMatchesToShow  <- readMaybe (T.unpack tnumberOfMatchesToShow) :: Maybe Int
     , Just matchThreshold         <- readMaybe (T.unpack tmatchThreshold) :: Maybe Int
-    = Right $ Just $ Switch {language=language, matchThreshold=matchThreshold, numberOfMatchesToShow=numberOfMatchesToShow, filesByDirectory=filesByDirectory, comment=comment, experimental=experimental}
+    = Right $ Just $ Switch {language=languageSubstitution language, matchThreshold=matchThreshold, numberOfMatchesToShow=numberOfMatchesToShow, filesByDirectory=filesByDirectory, comment=comment, experimental=experimental}
 
 -- At some point do proper validation pass here
 switchthing _ _ _ _ _ _ = Left "Missing switches"
