@@ -11,7 +11,7 @@
 
 module Handler.Home where
 
-import Import hiding (decodeUtf8, decodeUtf8', encodeUtf8, hGetContents, connect)
+import Import hiding (decodeUtf8, encodeUtf8, hGetContents, connect)
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 import Text.Julius (RawJS (..))
 import Network.Socket hiding (recv)
