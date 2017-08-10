@@ -126,7 +126,8 @@ postHomeR = do
               let decorated_descriptors = zip (fmap (T.pack . show) (take (length all_descriptors) [1..])) all_descriptors
               maybe_files <- mapM (make_file tmpFile $ language $ switch mossForm) decorated_descriptors
               let files = catMaybes maybe_files
-              return files
+              let redecorated_files = fmap (\(new_id, FileData{..}) -> FileData { contents=contents, id=new_id, lang=lang, path=path, size=size }) (zip (fmap (T.pack . show) (take (length files) [1..])) files)
+              return redecorated_files
             linkToResultsTemp <- lift $ submitToMoss (switch mossForm) fileData
             let linkToResults :: Maybe PackResults = Just linkToResultsTemp
             setTitle "Files submitted to Moss"
