@@ -146,7 +146,7 @@ make_file file lang (id, selector) = do
   case decodeUtf8' bytes of
     Left _ -> return Nothing
     Right contents -> do
-        let size = T.pack ((show $ T.length contents) :: String)
+        let size = T.pack ((show $ BS.length bytes) :: String) -- We get the number of bytes this would take as a bytestring, as that is what the Moss server needs to know
         return $ Just $ FileData {contents=contents, size=size, path=path, lang=lang, id=id}
 
 sampleForm :: Form MossForm
