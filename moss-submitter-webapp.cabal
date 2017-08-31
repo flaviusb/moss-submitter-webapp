@@ -74,6 +74,7 @@ library
     , transformers
     , conduit
     , conduit-combinators
+    , Glob
   if (flag(dev)) || (flag(library-only))
     ghc-options: -Wall -fwarn-tabs -O0
     cpp-options: -DDEVELOPMENT
@@ -143,6 +144,7 @@ executable moss-submitter-webapp
     , transformers
     , conduit
     , conduit-combinators
+    , Glob
     , moss-submitter-webapp
   if flag(library-only)
     buildable: False
@@ -201,6 +203,7 @@ test-suite test
     , transformers
     , conduit
     , conduit-combinators
+    , Glob
     , moss-submitter-webapp
     , hspec >=2.0.0
     , yesod-test

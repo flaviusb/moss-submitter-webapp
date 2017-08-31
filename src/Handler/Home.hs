@@ -36,6 +36,7 @@ import Path.Internal
 import Control.Monad.Trans.Class
 import Data.Either (isRight)
 import Conduit hiding (connect)
+import System.FilePath.Glob as Glob (Pattern, match, compile, decompile)
 
 makea href = preEscapedToMarkup $ mconcat ["<a href=\"", href, "\">", href, "</a>"]
 
@@ -66,6 +67,7 @@ defaultSwitches = Switch {
 data MossForm = MossForm
   {
     fileInfo :: FileInfo,
+    filter   :: Maybe Pattern,
     switch   :: Switch
   }
 
@@ -152,6 +154,7 @@ make_file file lang (id, selector) = do
 sampleForm :: Form MossForm
 sampleForm = renderBootstrap3 BootstrapBasicForm $ MossForm
     <$> fileAFormReq "Choose a file"
+    <*> aopt globField switchSettings Nothing
     <*> areq switchesField switchSettings (Just defaultSwitches)
     where switchSettings = FieldSettings
             { fsLabel = "Moss settings"
@@ -163,6 +166,26 @@ sampleForm = renderBootstrap3 BootstrapBasicForm $ MossForm
                 , ("placeholder", "")
                 ]
             }
+
+globField :: Field Handler Pattern
+globField  = Field {
+               fieldParse = \rawvals _filevals ->
+                 case rawvals of
+                   [glob] -> return $ Right $ Just (compile $ T.unpack glob)
+                   _      -> return $ Left $ fromString ("No glob. Got: " ++ (show rawvals)),
+               fieldView = \idAttr nameAttr otherAttrs eResult isReq ->
+                             let hasDefaults = isRight eResult
+                                 noLeft      = (\_ -> "")
+                                 in
+                             [whamlet|
+                               <br>
+                               <label for="glob">
+                                 You can enter a file globbing pattern here. If you do, only files that match that pattern from within the zip file will be uploaded.
+                               <input type="text" id="glob" name=#{nameAttr} :hasDefaults:value={either noLeft Glob.decompile eResult} >
+                             |],
+               fieldEnctype = Multipart
+             }
+               
 
 languageSubstitution :: Text -> Text
 languageSubstitution "C++" = "cc"
