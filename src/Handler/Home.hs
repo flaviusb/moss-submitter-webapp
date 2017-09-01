@@ -35,6 +35,7 @@ import Path (parseAbsFile)
 import Path.Internal
 import Control.Monad.Trans.Class
 import Data.Either (isRight)
+import Data.Maybe (mapMaybe)
 import Conduit hiding (connect)
 import System.FilePath.Glob as Glob (Pattern, match, compile, decompile)
 
@@ -66,9 +67,9 @@ defaultSwitches = Switch {
 
 data MossForm = MossForm
   {
-    fileInfo :: FileInfo,
-    filter   :: Maybe Pattern,
-    switch   :: Switch
+    fileInfo    :: FileInfo,
+    globPattern :: Maybe Pattern,
+    switch      :: Switch
   }
 
 
@@ -125,7 +126,8 @@ postHomeR = do
               liftIO $ do
                 runConduitRes $ (fileSource $ fileInfo mossForm) .| (sinkFileBS tmpFile)
               all_descriptors <- withArchive (Path tmpFile) (M.keys <$> getEntries)
-              let decorated_descriptors = zip (fmap (T.pack . show) (take (length all_descriptors) [1..])) all_descriptors
+              let globbed_descriptors = maybe all_descriptors (\pattern -> mapMaybe (\x -> if Glob.match pattern (T.unpack $ getEntryName x) then Just x else Nothing) all_descriptors) $ globPattern mossForm
+              let decorated_descriptors = zip (fmap (T.pack . show) (take (length globbed_descriptors) [1..])) globbed_descriptors
               maybe_files <- mapM (make_file tmpFile $ language $ switch mossForm) decorated_descriptors
               let files = catMaybes maybe_files
               let redecorated_files = fmap (\(new_id, FileData{..}) -> FileData { contents=contents, id=new_id, lang=lang, path=path, size=size }) (zip (fmap (T.pack . show) (take (length files) [1..])) files)
