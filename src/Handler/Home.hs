@@ -126,7 +126,10 @@ postHomeR = do
               liftIO $ do
                 runConduitRes $ (fileSource $ fileInfo mossForm) .| (sinkFileBS tmpFile)
               all_descriptors <- withArchive (Path tmpFile) (M.keys <$> getEntries)
-              let globbed_descriptors = maybe all_descriptors (\pattern -> mapMaybe (\x -> if Glob.match pattern (T.unpack $ getEntryName x) then Just x else Nothing) all_descriptors) $ globPattern mossForm
+              let true_pattern = case globPattern mossForm of
+                                   Nothing  -> Nothing
+                                   Just pat -> if (Glob.decompile pat) == "" then Nothing else Just pat
+              let globbed_descriptors = maybe all_descriptors (\pattern -> mapMaybe (\x -> if Glob.match pattern (T.unpack $ getEntryName x) then Just x else Nothing) all_descriptors) true_pattern
               let decorated_descriptors = zip (fmap (T.pack . show) (take (length globbed_descriptors) [1..])) globbed_descriptors
               maybe_files <- mapM (make_file tmpFile $ language $ switch mossForm) decorated_descriptors
               let files = catMaybes maybe_files
