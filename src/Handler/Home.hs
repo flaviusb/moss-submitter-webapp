@@ -183,7 +183,7 @@ globField  = Field {
                                <br>
                                <label for="glob">
                                  You can enter a file globbing pattern here. If you do, only files that match that pattern from within the zip file will be uploaded.
-                               <input type="text" id="glob" name=#{nameAttr} :hasDefaults:value={either noLeft Glob.decompile eResult} >
+                               <input type="text" id="glob" name=#{nameAttr} :hasDefaults:value=#{either noLeft Glob.decompile eResult} >
                              |],
                fieldEnctype = Multipart
              }
