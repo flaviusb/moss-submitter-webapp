@@ -185,7 +185,10 @@ globField  = Field {
                              [whamlet|
                                <br>
                                <label for="glob">
-                                 You can enter a file globbing pattern here. If you do, only files that match that pattern from within the zip file will be uploaded.
+                                 You can enter a file globbing pattern here. If you do, only files that match that pattern from within the zip file will be uploaded. The pattern uses posixy globbing rules. For example, **/*.py to only upload files that end in .py from any folder. More details about the globbing sytax can be found
+                                   <a href="https://hackage.haskell.org/package/Glob-0.8.0/docs/System-FilePath-Glob.html#g:3">
+                                     here
+                                 .
                                <input type="text" id="glob" name=#{nameAttr} :hasDefaults:value=#{either noLeft Glob.decompile eResult} >
                              |],
                fieldEnctype = Multipart
