@@ -32,6 +32,7 @@ addons:
     packages:
       - libgmp-dev
       - happy
+      - alex
 
 before_install:
 # install stack
