@@ -1,8 +1,6 @@
-# This is the simple Travis configuration, which is intended for use
-# on applications which do not require cross-platform and
-# multiple-GHC-version support. For more information and other
-# options, see:
+# Altered .travis.yml
 #
+# Base and info here:
 # https://docs.haskellstack.org/en/stable/travis_ci/
 #
 # Copy these contents into the root directory of your Github project in a file
@@ -14,13 +12,19 @@ sudo: false
 # Choose a build environment
 dist: xenial
 
-# Do not choose a language; we provide our own build tools.
-language: generic
+language: haskell
 
 # Caching so the next build will be fast too.
 cache:
   directories:
-  - $HOME/.stack
+  - "$HOME/.stack"
+  - "$TRAVIS_BUILD_DIR/.stack-work"
+
+matrix:
+  include:
+  - ghc: 8.2.2
+  - ghc: 8.4.4
+  - ghc: 8.6.5
 
 # Ensure necessary system libraries are present
 addons:
@@ -29,15 +33,17 @@ addons:
       - libgmp-dev
 
 before_install:
-# Download and unpack the stack executable
-- mkdir -p ~/.local/bin
-- export PATH=$HOME/.local/bin:$PATH
-- travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+# install stack
+- curl -sSL https://get.haskellstack.org/ | sh
 
 install:
 # Build dependencies
-- stack --no-terminal --install-ghc test --only-dependencies
+- stack --version
+- stack build --system-ghc --test --bench --no-run-tests --no-run-benchmarks
 
 script:
 # Build the package, its tests, and its docs and run the tests
-- stack --no-terminal test --haddock --no-haddock-deps
+- stack --no-terminal test --system-ghc
+
+notifications:
+  email: false
