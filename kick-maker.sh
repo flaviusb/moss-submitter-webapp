@@ -37,7 +37,7 @@ cat > kick.sh <<END
 foo=\`screen -list | grep [.]mosssubmitterwebapp\`
 if [ -z "\$foo" ]
 then
-  MOSSUserID=$MOSSUserID
+  export MOSSUserID=$MOSSUserID
   screen -d -m -S mosssubmitterwebapp stack exec -- yesod devel
 fi
 END
