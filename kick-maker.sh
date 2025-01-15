@@ -38,6 +38,8 @@ foo=\`screen -list | grep [.]mosssubmitterwebapp\`
 if [ -z "\$foo" ]
 then
   export MOSSUserID=$MOSSUserID
+  SCRIPT_DIR=\$( cd -- "\$( dirname -- "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+  cd "\$SCRIPT_DIR"
   screen -d -m -S mosssubmitterwebapp stack exec -- yesod devel
 fi
 END
